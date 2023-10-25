@@ -1,6 +1,7 @@
 #!/bin/env python
 
 import argparse
+from libnmap.parser import NmapParser
 from modules import banner
 
 if __name__ == "__main__":

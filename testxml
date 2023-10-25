@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/local/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.92SVN scan initiated Wed Oct 25 11:59:45 2023 as: nmap -&#45;append-output -sVC -p 113,179,10443 -Pn -T4 -oX testxml 194.72.72.97,194.72.72.105 -->
+<nmaprun scanner="nmap" args="nmap -&#45;append-output -sVC -p 113,179,10443 -Pn -T4 -oX testxml 194.72.72.97,194.72.72.105" start="1698231585" startstr="Wed Oct 25 11:59:45 2023" version="7.92SVN" xmloutputversion="1.05">
+<scaninfo type="connect" protocol="tcp" numservices="3" services="113,179,10443"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<runstats><finished time="1698231585" timestr="Wed Oct 25 11:59:45 2023" summary="Nmap done at Wed Oct 25 11:59:45 2023; 0 IP addresses (0 hosts up) scanned in 0.42 seconds" elapsed="0.42" exit="success"/><hosts up="0" down="0" total="0"/>
+</runstats>
+</nmaprun>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/local/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.92SVN scan initiated Wed Oct 25 11:59:57 2023 as: nmap -&#45;append-output -sVC -p 113,179,10443 -Pn -T4 -oX testxml 194.72.72.97 -->
+<nmaprun scanner="nmap" args="nmap -&#45;append-output -sVC -p 113,179,10443 -Pn -T4 -oX testxml 194.72.72.97" start="1698231597" startstr="Wed Oct 25 11:59:57 2023" version="7.92SVN" xmloutputversion="1.05">
+<scaninfo type="connect" protocol="tcp" numservices="3" services="113,179,10443"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<host starttime="1698231611" endtime="1698231632"><status state="up" reason="user-set" reason_ttl="0"/>
+<address addr="194.72.72.97" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="tcp" portid="113"><state state="closed" reason="conn-refused" reason_ttl="0"/><service name="ident" method="table" conf="3"/></port>
+<port protocol="tcp" portid="179"><state state="open" reason="syn-ack" reason_ttl="0"/><service name="tcpwrapped" method="probed" conf="8"/></port>
+<port protocol="tcp" portid="10443"><state state="open" reason="syn-ack" reason_ttl="0"/><service name="http" product="Fortinet security device httpd" devicetype="security-misc" tunnel="ssl" method="probed" conf="10"/><script id="http-title" output="Site doesn&apos;t have a title (text/html)."></script><script id="http-server-header" output="xxxxxxxx-xxxxx"><elem>xxxxxxxx-xxxxx</elem>
+</script><script id="ssl-cert" output="Subject: commonName=FG100FTK22025052/organizationName=Fortinet/stateOrProvinceName=California/countryName=US&#xa;Not valid before: 2022-03-01T06:54:35&#xa;Not valid after:  2056-01-19T03:14:07"><table key="subject">
+<elem key="commonName">FG100FTK22025052</elem>
+<elem key="countryName">US</elem>
+<elem key="emailAddress">support@fortinet.com</elem>
+<elem key="localityName">Sunnyvale</elem>
+<elem key="organizationName">Fortinet</elem>
+<elem key="organizationalUnitName">FortiGate</elem>
+<elem key="stateOrProvinceName">California</elem>
+</table>
+<table key="issuer">
+<elem key="commonName">fortinet-subca2001</elem>
+<elem key="countryName">US</elem>
+<elem key="emailAddress">support@fortinet.com</elem>
+<elem key="localityName">Sunnyvale</elem>
+<elem key="organizationName">Fortinet</elem>
+<elem key="organizationalUnitName">Certificate Authority</elem>
+<elem key="stateOrProvinceName">California</elem>
+</table>
+<table key="pubkey">
+<elem key="type">rsa</elem>
+<elem key="bits">2048</elem>
+<elem key="modulus">A15D6BD98C3CCC600AFE26538F975128C753BBA6674C74805F6F93890186179A49A9353BB453D478D02363BDB8A5D5D44A097CEA1C05DA7B2D1EF518AA4BE2BBD460B1016FC32D20F7E2A289803AF34F9EFDAF8DF4B11D85F14DFC4987999218B096F85FB793A49C4AE651035F618E9508C76034D925A4D49E38ADBB62414F5BC3E4EE28FCC1A7046B9809AA7858562F2B3D877ECC2512749A03BAE07030A65DBD97A63B24377A02C557975EFA3CE95B76A3840B7B4B7C17868022C6A747CD12A37497D6544735E9E1011D5226D728A286069A01FCE58019D8D01F6FAEA6864E27CB410182DD78CD13850D3E7EB5A0172910551037A054C4D493826E3B784993</elem>
+<elem key="exponent">65537</elem>
+</table>
+<table key="extensions">
+<table>
+<elem key="name">X509v3 Subject Key Identifier</elem>
+<elem key="value">6A:DD:A1:36:22:53:1D:52:AE:10:3A:49:49:4A:4C:96:89:44:29:99</elem>
+</table>
+<table>
+<elem key="name">X509v3 Authority Key Identifier</elem>
+<elem key="value">keyid:98:2B:25:3C:30:CA:2C:2B:56:E7:DB:FC:59:33:B3:DC:3D:5B:6A:D7&#xa;DirName:/C=US/ST=California/L=Sunnyvale/O=Fortinet/OU=Certificate Authority/CN=fortinet-ca2/emailAddress=support@fortinet.com&#xa;serial:20:01&#xa;</elem>
+</table>
+<table>
+<elem key="name">X509v3 Basic Constraints</elem>
+<elem key="value">CA:FALSE</elem>
+<elem key="critical">true</elem>
+</table>
+<table>
+<elem key="name">X509v3 Key Usage</elem>
+<elem key="value">Digital Signature</elem>
+<elem key="critical">true</elem>
+</table>
+</table>
+<elem key="sig_algo">sha256WithRSAEncryption</elem>
+<table key="validity">
+<elem key="notBefore">2022-03-01T06:54:35</elem>
+<elem key="notAfter">2056-01-19T03:14:07</elem>
+</table>
+<elem key="md5">1fcdbc7acb606d56274aa75f37c26315</elem>
+<elem key="sha1">f423f22ad782539720b37821ec97d50df35a30cd</elem>
+<elem key="pem">-&#45;&#45;&#45;&#45;BEGIN CERTIFICATE-&#45;&#45;&#45;&#45;&#xa;MIIE4jCCA8qgAwIBAgIDTFziMA0GCSqGSIb3DQEBCwUAMIGrMQswCQYDVQQGEwJV&#xa;UzETMBEGA1UECBMKQ2FsaWZvcm5pYTESMBAGA1UEBxMJU3Vubnl2YWxlMREwDwYD&#xa;VQQKEwhGb3J0aW5ldDEeMBwGA1UECxMVQ2VydGlmaWNhdGUgQXV0aG9yaXR5MRsw&#xa;GQYDVQQDExJmb3J0aW5ldC1zdWJjYTIwMDExIzAhBgkqhkiG9w0BCQEWFHN1cHBv&#xa;cnRAZm9ydGluZXQuY29tMCAXDTIyMDMwMTA2NTQzNVoYDzIwNTYwMTE5MDMxNDA3&#xa;WjCBnTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExEjAQBgNVBAcT&#xa;CVN1bm55dmFsZTERMA8GA1UEChMIRm9ydGluZXQxEjAQBgNVBAsTCUZvcnRpR2F0&#xa;ZTEZMBcGA1UEAxMQRkcxMDBGVEsyMjAyNTA1MjEjMCEGCSqGSIb3DQEJARYUc3Vw&#xa;cG9ydEBmb3J0aW5ldC5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIB&#xa;AQChXWvZjDzMYAr+JlOPl1Eox1O7pmdMdIBfb5OJAYYXmkmpNTu0U9R40CNjvbil&#xa;1dRKCXzqHAXaey0e9RiqS+K71GCxAW/DLSD34qKJgDrzT579r430sR2F8U38SYeZ&#xa;khiwlvhft5OknErmUQNfYY6VCMdgNNklpNSeOK27YkFPW8Pk7ij8wacEa5gJqnhY&#xa;Vi8rPYd+zCUSdJoDuuBwMKZdvZemOyQ3egLFV5de+jzpW3ajhAt7S3wXhoAixqdH&#xa;zRKjdJfWVEc16eEBHVIm1yiihgaaAfzlgBnY0B9vrqaGTifLQQGC3XjNE4UNPn61&#xa;oBcpEFUQN6BUxNSTgm47eEmTAgMBAAGjggEXMIIBEzAdBgNVHQ4EFgQUat2hNiJT&#xa;HVKuEDpJSUpMlolEKZkwgdMGA1UdIwSByzCByIAUmCslPDDKLCtW59v8WTOz3D1b&#xa;atehgaukgagwgaUxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRIw&#xa;EAYDVQQHEwlTdW5ueXZhbGUxETAPBgNVBAoTCEZvcnRpbmV0MR4wHAYDVQQLExVD&#xa;ZXJ0aWZpY2F0ZSBBdXRob3JpdHkxFTATBgNVBAMTDGZvcnRpbmV0LWNhMjEjMCEG&#xa;CSqGSIb3DQEJARYUc3VwcG9ydEBmb3J0aW5ldC5jb22CAiABMAwGA1UdEwEB/wQC&#xa;MAAwDgYDVR0PAQH/BAQDAgeAMA0GCSqGSIb3DQEBCwUAA4IBAQAEx3dsgzQt7Sbz&#xa;RQq1+qNjSSKS+PugHciW9iE4QMn4n+s+A9fflTtstWMDnE3KLAZhWvow5ALrK7Uu&#xa;nVOFPsWRtfIbKSW+rdpDFaonoWZLSHlry0/JXlGGZLmgoAqr7ekkZT56asji9woK&#xa;9R5zWhKJ+WlETiQxjzrefb3azSGyWwCkcs8NB5ODQuACR1wk3ZiDWK7gIm+QOFWI&#xa;iVD1xu1fZGNB4Y78OdbCn53YSRh0W/UgoGNweTBa/QovxkIVwJA3QjfDfd2p0ckh&#xa;ySUMHuP8zzcCKzKkZS+GpkSyGaqqmqN7XcXSTzyGrgH3fLROMBojIab4XFazw701&#xa;uZ08QALx&#xa;-&#45;&#45;&#45;&#45;END CERTIFICATE-&#45;&#45;&#45;&#45;&#xa;</elem>
+</script><script id="ssl-date" output="TLS randomness does not represent time"></script><script id="http-methods" output="&#xa;  Potentially risky methods: "><table key="Potentially risky methods">
+<elem></elem>
+</table>
+</script></port>
+</ports>
+<times srtt="17946" rttvar="10444" to="100000"/>
+</host>
+<runstats><finished time="1698231632" timestr="Wed Oct 25 12:00:32 2023" summary="Nmap done at Wed Oct 25 12:00:32 2023; 1 IP address (1 host up) scanned in 35.23 seconds" elapsed="35.23" exit="success"/><hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun>
