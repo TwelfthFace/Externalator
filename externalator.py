@@ -3,6 +3,7 @@
 import argparse
 import subprocess
 import os
+from termcolor import colored
 from libnmap.parser import NmapParser
 from modules import banner
 
@@ -21,17 +22,26 @@ def main():
                 if service.open() and "ssl" in service.tunnel:
                     print(f"{service.tunnel} found for service: {service.service} on port {service.port}")
                     ssl_ports.append(service.port)
-            run_sslscan(host.address, ssl_ports)
+            run_testssl(host.address, ssl_ports)
 
-        print(ssl_ports[0])        
+def run_testssl(ip, port_list):
+    deprecated_protocols = ["SSLv2", "SSLv3", "TLS 1", "TLS 1.1"]
 
-def run_sslscan(ip, port_list):
     for port in port_list:
-        if not os.path.isfile(f"./{ip}-sslscan-{port}"):
-            f = open(f"./{ip}-sslscan-{port}")
-            subprocess.run(["sslscan",f"{ip}:{port}"], check=True, stdout=f, stderr=f)
+        filename = f"./{ip}-testssl-{port}"
+        if not filename:
+            f = open(filename)
+            subprocess.run(["testssl", "--color", "0", f"{ip}:{port}"], check=True, stdout=f, stderr=f)
     else:
-        print("FILE EXISTS")
+        with open(filename) as file:
+            for line in file:
+                line = line.strip()
+                if "offered (deprecated)" in line:
+                    for protocol in deprecated_protocols:
+                        if protocol in line:
+                            line = colored(line, 'white', 'on_red')
+                            break
+                print(line) 
 
 if __name__ == "__main__":
 
