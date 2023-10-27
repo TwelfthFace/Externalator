@@ -3,9 +3,8 @@
 import argparse
 import subprocess
 import os
-from termcolor import colored
 from libnmap.parser import NmapParser
-from modules import banner
+from modules import banner, external_model as em
 
 def main():
 
@@ -18,30 +17,12 @@ def main():
         ssl_ports = []
     
         for host in nmap_report.hosts:
-            for service in host.services:
-                if service.open() and "ssl" in service.tunnel:
-                    print(f"{service.tunnel} found for service: {service.service} on port {service.port}")
-                    ssl_ports.append(service.port)
-            run_testssl(host.address, ssl_ports)
-
-def run_testssl(ip, port_list):
-    deprecated_protocols = ["SSLv2", "SSLv3", "TLS 1", "TLS 1.1"]
-
-    for port in port_list:
-        filename = f"./{ip}-testssl-{port}"
-        if not filename:
-            f = open(filename)
-            subprocess.run(["testssl", "--color", "0", f"{ip}:{port}"], check=True, stdout=f, stderr=f)
-    else:
-        with open(filename) as file:
-            for line in file:
-                line = line.strip()
-                if "offered (deprecated)" in line:
-                    for protocol in deprecated_protocols:
-                        if protocol in line:
-                            line = colored(line, 'white', 'on_red')
-                            break
-                print(line) 
+            for port in host.get_open_ports():
+                try:
+                    print(port[0])
+                    em.expected_port_service(port[0])
+                except Exception as e:
+                        print("EXCEPTION")
 
 if __name__ == "__main__":
 
