@@ -18,11 +18,8 @@ def main():
     
         for host in nmap_report.hosts:
             for port in host.get_open_ports():
-                try:
-                    print(port[0])
-                    em.expected_port_service(port[0])
-                except Exception as e:
-                        print("EXCEPTION")
+                print(port[0])
+                em.expected_port_service(port[0])
 
 if __name__ == "__main__":
 
