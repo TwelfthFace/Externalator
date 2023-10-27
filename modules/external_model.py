@@ -1,24 +1,26 @@
 def expected_port_service(port):
+    port_port = port[0]
+    port_protocol = port[1]
     try:    
-        match port:
+        match port[0]:
             case 21:
-                print(f"{port}")
+                print(f"{port[0]}")
             case 22:
-                print(f"{port}")
+                print(f"{port[0]}")
             case 23:
-                print(f"{port}")
+                print(f"{port[0]}")
             case 25:
-                print(f"{port}")
+                print(f"{port[0]}")
             case 69:
-                print(f"{port}")
+                print(f"{port[0]}")
             case 110:
-                print(f"{port}")
+                print(f"{port[0]}")
             case 143:
-                print(f"{port}")
+                print(f"{port[0]}")
             case 161:
-                print(f"{port}")
+                print(f"{port[0]}")
             case 162:
-                print(f"{port}")
+                print(f"{port[0]}")
             case 80:
                 print(f"{port}")
             case 443:
@@ -42,6 +44,6 @@ def expected_port_service(port):
             case 1434:
                 print(f"{port}")
             case _:
-                raise NotImplementedError(f"PORT:{port} NOT IMPLEMENTED! Yet...")
+                raise NotImplementedError(f"PORT:{port[0]} NOT IMPLEMENTED! Yet...")
     except NotImplementedError as e:
         print(repr(e))

@@ -19,7 +19,7 @@ def main():
         for host in nmap_report.hosts:
             for port in host.get_open_ports():
                 print(port[0])
-                em.expected_port_service(port[0])
+                em.expected_port_service(port)
 
 if __name__ == "__main__":
 
