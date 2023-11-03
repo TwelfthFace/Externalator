@@ -10,16 +10,17 @@ def main():
 
     with open('scope.txt') as f:
         scope_ip = [line.rstrip('\n') for line in f]
-        nmap_report = NmapParser.parse_fromfile("{}-tcpscan-0.xml".format(scope_ip[0]))
-        
-        print(f"{nmap_report.hosts[0]}"+100*"-")
-        
-        ssl_ports = []
+        for ip in scope_ip:
+            nmap_report = NmapParser.parse_fromfile("{}-tcpscan-0.xml".format(ip))
+            
+            print(f"{ip}"+100*"-")
+            
+            ssl_ports = []
     
-        for host in nmap_report.hosts:
-            for port in host.get_open_ports():
-                print(port[0])
-                em.expected_port_service(port)
+            for host in nmap_report.hosts:
+                for port in host.get_open_ports():
+                    print(port[0])
+                    em.expected_port_service(port)
 
 if __name__ == "__main__":
 
