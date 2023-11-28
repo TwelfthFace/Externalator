@@ -8,6 +8,22 @@ from modules import banner, external_model as em
 
 def main(): 
     print("main")   
+    print(working_dir)
+
+    xml_files = [os.path.join(working_dir, name) for name in os.listdir(working_dir)]
+
+    for file in xml_files:
+        nmap_report = NmapParser.parse_fromfile(file)
+        if "TCP" in file:
+             print('TCP: ', end='')
+             for host in nmap_report.hosts:
+                 print(host)
+        else:
+             print('UDP: ', end='')
+             for host in nmap_report.hosts:
+                 print(host)
+
+
    # with open('scope.txt') as f:
    #     scope_ip = [line.rstrip('\n') for line in f]
    #     for ip in scope_ip:
@@ -26,9 +42,6 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='External Infrastructure automator for usage inside PentestPeople.')
     parser.add_argument('work_dir', action='store', metavar='work_dir', help='Working Directory, should pertain to a single clients Nmap files.')
-    #parser.add_argument('IP', metavar='ip', help='IP address to aim at.')
-    #parser.add_argument('Port', metavar='port', type=int, help='Port to aim at.')
-   
 
     args = parser.parse_args()
 
@@ -40,7 +53,7 @@ if __name__ == "__main__":
         print(f'{args.work_dir}: exists...')
         main()
     else:
-        print(f'{args.work_dir}: doesn\'t  exist... create the directory (Y/n): ')
+        print(f'{args.work_dir}: doesn\'t  exist... create the directory (Y/n): ', end='')
         x = input()
         if x == 'y' or x == 'Y' or x == '':
             os.mkdir(working_dir)
