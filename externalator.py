@@ -17,7 +17,6 @@ def main():
                 print(f'{host.address} ')
                 for port in host.get_open_ports():
                    service = host.get_service(port[0], protocol=port[1])
-                   #print(f"port: {port} service: {service}")
                    em.expected_port_service(host, host.address, port)
         except Exception as e:
             errors.append(f"Invalid XML in {working_dir} : {file} : {e}")
