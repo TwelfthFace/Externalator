@@ -1,48 +1,50 @@
-def expected_port_service(port):
-    port_port = port[0]
-    port_protocol = port[1]
+def expected_port_service(ip, port):
     try:    
-        match port[0]:
-            case 21:
-                print(f"{port[0]}")
-            case 22:
-                print(f"{port[0]}")
-            case 23:
-                print(f"{port[0]}")
-            case 25:
-                print(f"{port[0]}")
-            case 69:
-                print(f"{port[0]}")
-            case 110:
-                print(f"{port[0]}")
-            case 143:
-                print(f"{port[0]}")
-            case 161:
-                print(f"{port[0]}")
-            case 162:
-                print(f"{port[0]}")
-            case 80:
-                print(f"{port}")
-            case 443:
-                print(f"{port}")
-            case 445:
-                print(f"{port}")
-            case 389:
-                print(f"{port}")
-            case 636:
-                print(f"{port}")
-            case 135:
-                print(f"{port}")
-            case 3389:
-                print(f"{port}")
-            case 1433:
-                print(f"{port}")
-            case 4022:
-                print(f"{port}")
-            case 135:
-                print(f"{port}")
-            case 1434:
-                print(f"{port}")
+        match port[0], port[1]:
+            case 21, 'tcp':
+                print("")
+            case 22, 'tcp':
+                print("")
+            case 23, 'tcp':
+                print("")
+            case 25, 'tcp':
+                print("")
+            case 69, 'udp':
+                print("")
+            case 110, 'tcp':
+                print("")
+            case 143, 'tcp':
+                print("")
+            case 161, 'udp':
+                print("")
+            case 162, 'udp':
+                print("")
+            case 80, 'tcp':
+                print("")
+            case 443, 'tcp':
+                print("")
+            case 53, 'udp':
+                print("")
+            case 445, 'tcp':
+                print("")
+            case 389, 'tcp':
+                print("")
+            case 636, 'tcp':
+                print("")
+            case 135, 'tcp':
+                print("")
+            case 3389, 'tcp':
+                print("")
+            case 1433, 'tcp':
+                print("")
+            case 4022, 'tcp':
+                print("")
+            case 135, 'tcp':
+                print("")
+            case 1434, 'tcp':
+                print("")
+            case 1434, 'udp':
+                print("")
             case _:
                 raise NotImplementedError(f"PORT:{port[0]} NOT IMPLEMENTED! Yet...")
     except NotImplementedError as e:
