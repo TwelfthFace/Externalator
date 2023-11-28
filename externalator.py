@@ -14,15 +14,12 @@ def main():
 
     for file in xml_files:
         nmap_report = NmapParser.parse_fromfile(file)
-        if "TCP" in file:
-             print('TCP: ', end='')
-             for host in nmap_report.hosts:
-                 print(host)
-        else:
-             print('UDP: ', end='')
-             for host in nmap_report.hosts:
-                 print(host)
-
+        for host in nmap_report.hosts:
+            print(f'{host.address} ')
+            for port in host.get_open_ports():
+               service = host.get_service(port[0], protocol=port[1])
+               print(f"port: {port} service: {service}")
+        print('-'*100)
 
    # with open('scope.txt') as f:
    #     scope_ip = [line.rstrip('\n') for line in f]
