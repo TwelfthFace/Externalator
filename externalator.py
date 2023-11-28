@@ -7,33 +7,23 @@ from libnmap.parser import NmapParser
 from modules import banner, external_model as em
 
 def main(): 
-    print("main")   
-    print(working_dir)
-
+    errors = []
     xml_files = [os.path.join(working_dir, name) for name in os.listdir(working_dir)]
 
     for file in xml_files:
-        nmap_report = NmapParser.parse_fromfile(file)
-        for host in nmap_report.hosts:
-            print(f'{host.address} ')
-            for port in host.get_open_ports():
-               service = host.get_service(port[0], protocol=port[1])
-               print(f"port: {port} service: {service}")
-        print('-'*100)
-
-   # with open('scope.txt') as f:
-   #     scope_ip = [line.rstrip('\n') for line in f]
-   #     for ip in scope_ip:
-   #         nmap_report = NmapParser.parse_fromfile("{}-tcpscan-0.xml".format(ip))
-   #         
-   #         print(f"{ip}"+100*"-")
-   #         
-   #         ssl_ports = []
-   # 
-   #         for host in nmap_report.hosts:
-   #             for port in host.get_open_ports():
-   #                 print(port[0])
-   #                 em.expected_port_service(port)
+        try:
+            nmap_report = NmapParser.parse_fromfile(file)
+            for host in nmap_report.hosts:
+                print(f'{host.address} ')
+                for port in host.get_open_ports():
+                   service = host.get_service(port[0], protocol=port[1])
+                   print(f"port: {port} service: {service}")
+                   em.expected_port_service(port)
+            print('-'*100)
+        except Exception as e:
+            errors.append(f"Invalid XML in {working_dir} : {file} : {e}")
+        
+    [print(error) for error in errors]
 
 if __name__ == "__main__":
 
