@@ -10,6 +10,7 @@ def print_service_details(nmap_host, port):
     print(f"Protocol: {print_None_if_empty(service.protocol)}")
     print(f"Tunnel?: {print_None_if_empty(service.tunnel)}")
     print(f"Banner?: {print_None_if_empty(service.banner)}")
+    print('='*100)
 
 def expected_port_service(nmap_host, ip, port):
     try:    
@@ -63,4 +64,3 @@ def expected_port_service(nmap_host, ip, port):
     except Exception as e:
         print(repr(e))
 
-    print('-'*100)

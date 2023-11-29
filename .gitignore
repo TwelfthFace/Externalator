@@ -2,5 +2,8 @@
 */
 modules/*/
 !modules/
+vulns/*.json
+!vulns/
 *.txt
 *swp
+.pk
