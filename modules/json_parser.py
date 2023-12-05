@@ -12,7 +12,7 @@ def load_vulns_from_files(main_dir):
             data = json.load(f)
 
             for count, vuln in enumerate(data['data']):
-                print(vuln['name'])
+                print(vuln)
             total_count += count
             f.close()
         except Exception as e:
