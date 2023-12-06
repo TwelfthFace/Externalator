@@ -29,11 +29,11 @@ def ssl_tunnel_routine():
         check_returncode = 0
         if not os.path.isfile(check_file):
             if check is ssl_checks_to_do[0]:
-                check_proc = subprocess.run(check_proc_params[0])
+                check_proc = subprocess.run(check_proc_params[0], input='no'.encode('utf-8'))
             if check is ssl_checks_to_do[1]:
-                check_proc = subprocess.run(check_proc_params[1])
+                check_proc = subprocess.run(check_proc_params[1], input='no'.encode('utf-8'))
             if check is ssl_checks_to_do[2]:
-                check_proc = subprocess.run(check_proc_params[2])
+                check_proc = subprocess.run(check_proc_params[2], input='no'.encode('utf-8'))
         else:
             check_returncode = 0
     
