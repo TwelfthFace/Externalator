@@ -18,57 +18,33 @@ def print_service_details(nmap_host, port):
     print(' ')
 
 def ssl_tunnel_routine():
-    #check for deprecated version support
-    proto_check_file = current_path + '/proto_test_' + current_ip + '_' + str(current_port[0])
-    proto_returncode = 0
-    # got to do this because of a testssl bug (or lack of feature) if file exists the json file will be invalidated as ssltest will append errors to the json file incorrectly
-    if not os.path.isfile(proto_check_file):
-        proto_check = subprocess.run(["testssl","-p", "-oj", proto_check_file, current_ip + ':' + str(current_port[0])])
-        proto_checkcode = proto_check.returncode
-    else:
-        proto_returncode = 0
-    print('#'*50 + 'PROTOCOL ERRORS' + ('#' * (50 - len('PROTOCOL ERRORS'))))
-    if not proto_returncode >= 242:
-        with open(proto_check_file, "r") as f:
-            proto_json = json.load(f)
-            for proto_entry in proto_json:
-                if proto_entry['severity'] not in ['WARN', 'OK', 'INFO']:
-                    print(f"VULNERABLE: {proto_entry['id']} FINDING: {proto_entry['finding']}")
+#    #enum ciphers: check for CBC ciphers (Lucky13) - BEAST CONDITIONS - SWEET32 - testssl OR sslscan OR nMap
+#    #check for other vulns (Heartbleed, CCS,Ticketbleed, ROBOT, Secure_Renegotiation, Secure_Client-Initiated_Renegotiation, CRIME, BREACH POODLE, TLS_FALLBACK_SCSV, SWEET32, FREAK, DROWN, LOGJAM, BEAST, LUCKY13, Winshock, RC4)
+    ssl_checks_to_do = ['PROTOCOL', 'CERTIFICATE','VULNERABILITY']
+    for check in ssl_checks_to_do:
+        check_file = current_path + '/' + check.lower() + '_test_' + current_ip + '_' + str(current_port[0])
+        check_proc_params = [["testssl", "-p", "-oj", check_file, '-q', current_ip + ':' + str(current_port[0])],
+                             ["testssl", "-S", "-oj", check_file, '-q', current_ip + ':' + str(current_port[0])],
+                             ["testssl", "-U", "-oj", check_file, '-q', current_ip + ':' + str(current_port[0])]]
+        check_returncode = 0
+        if not os.path.isfile(check_file):
+            if check is ssl_checks_to_do[0]:
+                check_proc = subprocess.run(check_proc_params[0])
+            if check is ssl_checks_to_do[1]:
+                check_proc = subprocess.run(check_proc_params[1])
+            if check is ssl_checks_to_do[2]:
+                check_proc = subprocess.run(check_proc_params[2])
+        else:
+            check_returncode = 0
+    
+        print('#'*50 + check + ' ERRORS' + ('#' * (50 - len(check))))
+        if not check_returncode >= 242:
+            with open(check_file, "r") as f:
+                check_json = json.load(f)
+                for check_entry in check_json:
+                    if check_entry['severity'] not in ['WARN', 'OK', 'INFO']:
+                        print(f"VULNERABLE: {check_entry['id']} FINDING: {check_entry['finding']}")
 
-    #validate certificates: expirery, wildcards, NOT self-signed valid CA
-    cert_check_file = current_path + '/cert_test_' + current_ip + '_' + str(current_port[0])
-    cert_returncode = 0
-    # got to do this because of a testssl bug (or lack of feature) if file exists the json file will be invalidated as ssltest will append errors to the json file incorrectly
-    if not os.path.isfile(cert_check_file):
-        cert_check = subprocess.run(["testssl","-S", "-oj", cert_check_file, current_ip + ':' + str(current_port[0])])
-        cert_checkcode = cert_check.returncode
-    else:
-        cert_returncode = 0
-    print('#'*50 + 'CERTIFICATE ERRORS' + ('#' * (50 - len('CERTIFICATE ERRORS'))))
-    if not cert_returncode >= 242:
-        with open(cert_check_file, "r") as f:
-            cert_json = json.load(f)
-            for cert_entry in cert_json:
-                if cert_entry['severity'] not in ['WARN', 'OK', 'INFO']:
-                    print(f"VULNERABLE: {cert_entry['id']} FINDING: {cert_entry['finding']}")
-
-    #enum ciphers: check for CBC ciphers (Lucky13) - BEAST CONDITIONS - SWEET32 - testssl OR sslscan OR nMap
-    #check for other vulns (Heartbleed, CCS,Ticketbleed, ROBOT, Secure_Renegotiation, Secure_Client-Initiated_Renegotiation, CRIME, BREACH POODLE, TLS_FALLBACK_SCSV, SWEET32, FREAK, DROWN, LOGJAM, BEAST, LUCKY13, Winshock, RC4)
-    vuln_check_file = current_path + '/vuln_test_' + current_ip + '_' + str(current_port[0])
-    vuln_returncode = 0
-    # got to do this because of a testssl bug (or lack of feature) if file exists the json file will be invalidated as ssltest will append errors to the json file incorrectly
-    if not os.path.isfile(vuln_check_file):
-        vuln_check = subprocess.run(["testssl","-U", "-oj", vuln_check_file, current_ip + ':' + str(current_port[0])])
-        vuln_checkcode = vuln_check.returncode
-    else:
-        vuln_returncode = 0
-    print('#'*50 + 'VULNERABILITY ERRORS' + ('#' * (50 - len('VULNERABILITY ERRORS'))))
-    if not vuln_returncode >= 242:
-        with open(vuln_check_file, "r") as f:
-            vulns_json = json.load(f)
-            for vuln_entry in vulns_json:
-                if vuln_entry['severity'] not in ['WARN', 'OK', 'INFO']:
-                    print(f"VULNERABLE: {vuln_entry['id']} FINDING: {vuln_entry['finding']}")
 
 
 #def ftp_routine():
