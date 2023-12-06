@@ -49,6 +49,7 @@ if __name__ == "__main__":
         x = input()
         if x == 'y' or x == 'Y' or x == '':
             os.mkdir(working_dir)
+            os.mkdir(working_dir+'/xmls')
             main()
 
         if x == 'n' or x == 'N':
