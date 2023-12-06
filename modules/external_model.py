@@ -44,6 +44,9 @@ def ssl_tunnel_routine():
                 for check_entry in check_json:
                     if check_entry['severity'] not in ['WARN', 'OK', 'INFO']:
                         print(f"VULNERABLE: {check_entry['id']} FINDING: {check_entry['finding']}")
+        else:
+            print("!!!SKIPPED DUE TO ERROR!!!")
+            break
 
 
 
