@@ -10,7 +10,7 @@ def add_vulnerability(vuln_name):
         ip_data[current_ip] = []
     ip_data[current_ip].append({
         "port": current_port,
-        "vuln_name": vuln_name,
+        "vuln_name": vuln_json.normalise_testssl_vuln_to_sp(vuln_name),
         "vuln_desc": vuln_json.load_vuln_desc_from_sp(vuln_name)
     })
 
@@ -56,6 +56,8 @@ def ssl_tunnel_routine():
                 for check_entry in check_json:
                     if check_entry['severity'] not in ['WARN', 'OK', 'INFO']:
                         print(f"VULNERABLE: {check_entry['id']} FINDING: {check_entry['finding']}")
+                        add_vulnerability(check_entry['id'])
+                        
         else:
             print("!!!SKIPPED DUE TO ERROR!!!")
             break
