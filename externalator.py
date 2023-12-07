@@ -23,8 +23,6 @@ def main():
         except Exception as e:
             errors.append(f"Invalid XML in {working_dir} : {file} : {e}")
     
-    #json.load_vulns_from_files(path)
-
     [print(error) for error in errors]
 
 if __name__ == "__main__":

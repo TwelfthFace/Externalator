@@ -1,6 +1,18 @@
 import subprocess
 import os
 import json
+from modules import json_parser as vuln_json
+
+ip_data = {}
+
+def add_vulnerability(vuln_name):
+    if current_ip not in ip_data:
+        ip_data[current_ip] = []
+    ip_data[current_ip].append({
+        "port": current_port,
+        "vuln_name": vuln_name,
+        "vuln_desc": vuln_json.load_vuln_desc_from_sp(vuln_name)
+    })
 
 def print_None_if_empty(string):
     if string == "":
@@ -123,6 +135,9 @@ def expected_port_service(nmap_host, ip, port, path):
                 print_service_details(nmap_host, port)
             case 1434, 'udp':
                 print_service_details(nmap_host, port)
+            case 123, 'udp':
+                print_service_details(nmap_host, port)
+                add_vulnerability("Network Time Protocol (NTP) Mode 6 Scanner")
             case _:
                 print_service_details(nmap_host, port)
                 service = nmap_host.get_service(port[0], protocol=port[1])
@@ -130,4 +145,5 @@ def expected_port_service(nmap_host, ip, port, path):
                     ssl_tunnel_routine()
     except Exception as e:
         print(repr(e))
-
+    
+    print(json.dumps(ip_data))
