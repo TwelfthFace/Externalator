@@ -5,13 +5,20 @@ from modules import json_parser as vuln_json
 
 ip_data = {}
 
-def add_vulnerability(vuln_name):
+def add_vulnerability(vuln_name, vuln_def_desc):
+    sp_desc = vuln_json.load_vuln_desc_from_sp(vuln_name) 
+
+    if sp_desc is "NULL":
+        sp_desc = vuln_def_desc
+
     if current_ip not in ip_data:
         ip_data[current_ip] = []
+
     ip_data[current_ip].append({
         "port": current_port,
-        "vuln_name": vuln_json.normalise_testssl_vuln_to_sp(vuln_name),
-        "vuln_desc": vuln_json.load_vuln_desc_from_sp(vuln_name)
+        "vuln_name": vuln_json.normalise_vuln_to_sp(vuln_name),
+        "vuln_desc": sp_desc, 
+        "q_a_line": "{}|{}|{}".format(current_ip,current_port[1],current_port[0])
     })
 
 def print_None_if_empty(string):
@@ -55,8 +62,8 @@ def ssl_tunnel_routine():
                 check_json = json.load(f)
                 for check_entry in check_json:
                     if check_entry['severity'] not in ['WARN', 'OK', 'INFO']:
-                        print(f"VULNERABLE: {check_entry['id']} FINDING: {check_entry['finding']}")
-                        add_vulnerability(check_entry['id'])
+                        print(f"VULNERABLE: {vuln_json.normalise_vuln_to_sp(check_entry['id'])} FINDING: {check_entry['finding']}")
+                        add_vulnerability(check_entry['id'], check_entry['finding'])
                         
         else:
             print("!!!SKIPPED DUE TO ERROR!!!")
@@ -147,5 +154,3 @@ def expected_port_service(nmap_host, ip, port, path):
                     ssl_tunnel_routine()
     except Exception as e:
         print(repr(e))
-    
-    print(json.dumps(ip_data))

@@ -4,8 +4,9 @@ import argparse
 import subprocess
 import os
 import inspect, os.path
+import json
 from libnmap.parser import NmapParser
-from modules import banner, external_model as em, json_parser as json
+from modules import banner, external_model as em, json_parser as vuln_json
 def main(): 
     errors = []
     xml_files = [os.path.join(working_dir + '/xml', name) for name in os.listdir(working_dir + '/xml/')]
@@ -22,7 +23,27 @@ def main():
                        em.expected_port_service(host, host.address, port, working_dir)
         except Exception as e:
             errors.append(f"Invalid XML in {working_dir} : {file} : {e}")
+
+    #print(json.dumps(em.ip_data, indent=4))
     
+    grouped_data = {}
+
+    for ip, vulnerabilities in em.ip_data.items():
+        for vulnerability in vulnerabilities:
+            vuln_name = vulnerability["vuln_name"]
+            q_a_line = vulnerability["q_a_line"]
+    
+            if vuln_name not in grouped_data:
+                grouped_data[vuln_name] = {"q_a_lines": set()}
+    
+            grouped_data[vuln_name]["q_a_lines"].add(q_a_line)
+
+    for vuln_name, info in grouped_data.items():
+        print(f"Vulnerability Name: {vuln_name}")
+        print("Q&A Lines:")
+        print("\n".join(info['q_a_lines']))
+        print()
+
     [print(error) for error in errors]
 
 if __name__ == "__main__":
