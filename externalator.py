@@ -44,6 +44,10 @@ def main():
         print("\n".join(info['q_a_lines']))
         print()
 
+    print("IPs: ")
+    print("\n".join([ips[0] for ips in em.ip_data.items()]))
+    print()
+
     [print(error) for error in errors]
 
 if __name__ == "__main__":
@@ -68,7 +72,7 @@ if __name__ == "__main__":
         x = input()
         if x == 'y' or x == 'Y' or x == '':
             os.mkdir(working_dir)
-            os.mkdir(working_dir+'/xmls')
+            os.mkdir(working_dir+'/xml')
             main()
 
         if x == 'n' or x == 'N':
