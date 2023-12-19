@@ -2,10 +2,13 @@ import subprocess
 import os
 import json
 import re
+import requests
+from urllib3.exceptions import InsecureRequestWarning
 from ftplib import FTP, FTP_TLS
 from modules import json_parser as vuln_json
 
 ip_data = {}
+missing_headers_table = []
 
 def add_vulnerability(vuln_name, vuln_def_desc="NULL"):
     sp_desc = vuln_json.load_vuln_desc_from_sp(vuln_name) 
@@ -30,8 +33,7 @@ def print_None_if_empty(string):
         return None
     return string
 
-def print_service_details(nmap_host, port):
-    service = nmap_host.get_service(port[0], protocol=port[1])
+def print_service_details():
     print('='*100)
     print(f"Service Name: {print_None_if_empty(service.service)}")
     print(f"Port: {print_None_if_empty(service.port)}")
@@ -39,6 +41,33 @@ def print_service_details(nmap_host, port):
     print(f"Tunnel?: {print_None_if_empty(service.tunnel)}")
     print(f"Banner?: {print_None_if_empty(service.banner)}")
     print(' ')
+
+def check_headers(url):
+    try:
+        requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+        response = requests.get(url, timeout=15, verify=False)
+        print()
+        print("!! Checking Security Headers !!")
+        
+        if response.status_code // 100 == 2 or response.status_code == 403:
+            headers_to_check = ['Strict-Transport-Security', 'Content-Security-Policy', 'X-Content-Type-Options', 'X-Frame-Options']
+
+            if "X-XSS-Protection" in response.headers:
+                add_vulnerability("Deprecated Header In Use: X-XSS Protection")
+
+            missing_headers = []
+            for header in headers_to_check:
+                if header not in response.headers:
+                    missing_headers.append(header)
+            if missing_headers:
+                add_vulnerability("Missing HTTP Security Headers")
+                missing_headers_table.append(f"| {url} | {', '.join(missing_headers)} |")
+            else:
+                print(f"All security headers are present for {url}.")
+        else:
+            print(f"Error: {response.status_code} - Unable to fetch the URL {url}.")
+    except requests.RequestException as e:
+        print(f"Error: {e} at: {url}")
 
 def ssl_tunnel_routine():
 #    #enum ciphers: check for CBC ciphers (Lucky13) - BEAST CONDITIONS - SWEET32 - testssl OR sslscan OR nMap
@@ -144,70 +173,79 @@ def ssh_routine():
 #    #Check for NTLM information disclosure
 #
 def expected_port_service(nmap_host, ip, port, path):
-    global current_nmap_host, current_ip, current_port, current_path
+    global current_nmap_host, current_ip, current_port, current_path, service
     current_nmap_host = nmap_host
     current_path = path
     current_ip = ip 
     current_port = port
+    service = nmap_host.get_service(port[0], protocol=port[1])
     try:    
         match port[0], port[1]:
             case 21, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
                 ftp_routine()
             case 22, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
                 ssh_routine()
             case 23, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 25, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 69, 'udp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 110, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 143, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 161, 'udp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 162, 'udp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 80, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
+                check_headers("http://" + current_ip + ':' + str(current_port[0]))
             case 443, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
                 ssl_tunnel_routine()
+                if "http" in service.service:
+                    check_headers("https://" + current_ip + ':' + str(current_port[0]))
             case 53, 'udp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 445, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 388, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 993, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
                 ssl_tunnel_routine()
             case 636, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 135, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 3389, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 1433, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 4022, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 135, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 1434, 'tcp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 1434, 'udp':
-                print_service_details(nmap_host, port)
+                print_service_details()
             case 123, 'udp':
-                print_service_details(nmap_host, port)
+                print_service_details()
                 add_vulnerability("Network Time Protocol (NTP) Mode 6 Scanner")
             case _:
-                print_service_details(nmap_host, port)
-                service = nmap_host.get_service(port[0], protocol=port[1])
+                print_service_details()
                 if "ssl" in service.tunnel:
                     ssl_tunnel_routine()
+                    if "http" in service.service:
+                        check_headers("https://" + current_ip + ':' + str(current_port[0]))
+                else:
+                    if "http" in service.service:
+                        check_headers("http://" + current_ip + ':' + str(current_port[0]))
+
     except Exception as e:
         print(repr(e))

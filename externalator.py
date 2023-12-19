@@ -48,6 +48,15 @@ def main():
     print("\n".join([ips[0] for ips in em.ip_data.items()]))
     print()
 
+    print()
+    if em.missing_headers_table:
+        print("Missing Headers!")
+        print("| Host | Missing Headers |")
+        print("|------|-----------------|")
+        for header in em.missing_headers_table:
+            print(header)
+    print()
+        
     [print(error) for error in errors]
 
 if __name__ == "__main__":
