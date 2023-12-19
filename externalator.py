@@ -19,33 +19,40 @@ def main():
                     print('')
                     print('-'*50 + f'{host.address} ' + '-' * ( 49 - len(host.address)))
                     for port in host.get_open_ports():
-                       if host.hostnames:
-                           for hostname in host.hostnames:
-                               print("URL:" +  hostname)
-                               em.expected_port_service(host, hostname, port, working_dir)
-                    em.expected_port_service(host, host.address, port, working_dir)
+                        if host.hostnames:
+                            for hostname in host.hostnames:
+                                print("URL:" +  hostname)
+                                em.expected_port_service(host, hostname, port, working_dir)
+                        em.expected_port_service(host, host.address, port, working_dir)
         except Exception as e:
             errors.append(f"Invalid XML in {working_dir} : {file} : {e}")
 
-    #print(json.dumps(em.ip_data, indent=4))
-    
     grouped_data = {}
 
     for ip, vulnerabilities in em.ip_data.items():
         for vulnerability in vulnerabilities:
             vuln_name = vulnerability["vuln_name"]
             q_a_line = vulnerability["q_a_line"]
+            ip_protocol, protocol, port = q_a_line.split('|')
     
             if vuln_name not in grouped_data:
-                grouped_data[vuln_name] = {"q_a_lines": set()}
+                grouped_data[vuln_name] = {}
     
-            grouped_data[vuln_name]["q_a_lines"].add(q_a_line)
-
+            if ip_protocol not in grouped_data[vuln_name]:
+                grouped_data[vuln_name][ip_protocol] = {}
+    
+            if protocol not in grouped_data[vuln_name][ip_protocol]:
+                grouped_data[vuln_name][ip_protocol][protocol] = []
+    
+            grouped_data[vuln_name][ip_protocol][protocol].append(port)
+    
     for vuln_name, info in grouped_data.items():
         print()
         print(f"Vulnerability Name: {vuln_name}")
         print("Q&A Lines:")
-        print("\n".join(info['q_a_lines']))
+        for ip_protocol, protocol_info in info.items():
+            for protocol, ports in protocol_info.items():
+                print(f"{ip_protocol}|{protocol}|{','.join(ports)}")
 
     print()
     print("IPs: ")
