@@ -1,14 +1,16 @@
 import subprocess
 import os
 import json
+import re
+from ftplib import FTP, FTP_TLS
 from modules import json_parser as vuln_json
 
 ip_data = {}
 
-def add_vulnerability(vuln_name, vuln_def_desc):
+def add_vulnerability(vuln_name, vuln_def_desc="NULL"):
     sp_desc = vuln_json.load_vuln_desc_from_sp(vuln_name) 
 
-    if sp_desc is "NULL":
+    if sp_desc == "NULL":
         sp_desc = vuln_def_desc
 
     if current_ip not in ip_data:
@@ -17,9 +19,11 @@ def add_vulnerability(vuln_name, vuln_def_desc):
     ip_data[current_ip].append({
         "port": current_port,
         "vuln_name": vuln_json.normalise_vuln_to_sp(vuln_name),
-        "vuln_desc": sp_desc, 
-        "q_a_line": "{}|{}|{}".format(current_ip,current_port[1],current_port[0])
+        "vuln_desc": sp_desc,
+        'q_a_line': "{}|{}|{}".format(current_ip,current_port[1],current_port[0]) 
     })
+
+   # print(ip_data)
 
 def print_None_if_empty(string):
     if string == "":
@@ -69,28 +73,79 @@ def ssl_tunnel_routine():
             print("!!!SKIPPED DUE TO ERROR!!!")
             break
 
-
-
-#def ftp_routine():
+def ftp_routine():
     #check for STARTTLS support / unencrypted login
     #check for anonymous login
     #enumerate version information from banner, try and determine if the service is out of date. // publically disclosed vulnerabilties.
     #tools like nMap scripts / scrape output
+    try:
+        with FTP(current_ip, timeout=5) as ftp:
+            add_vulnerability("BANNER", ftp.getwelcome())
+            login_resp = ftp.login()
+            if "230" in login_resp:
+                print('#'*50 + ' ERRORS' + ('#' * (50 - len('ERRORS'))))
+                print(f"ANON LOGIN: {login_resp}")
+                add_vulnerability("Anonymous FTP Enabled")
+    
+        service = current_nmap_host.get_service(current_port[0], protocol=current_port[1])
 
-#def ssh_routine():
+        service_scripts = service.scripts_results
+        
+        for scripts in service_scripts:
+            if scripts['id'] == 'ssl-cert':
+                print('FTP advertises ssl-cert: probable explicit FTP support')
+                return
+            else:
+                add_vulnerability("Cleartext FTP Protocol Detection")
+    except Exception as e:
+        print(f'Error checking FTP: {e}')
+
+def ssh_routine():
 #    #check for SSHv1 
 #    #check for outdated SSH version in banner.
 #    #check for publically disclosed vulnerabilities.
 #    #ssh-audit to look for insecure kex algo
 #    #check for password authentication
-#
+    try:
+        result = subprocess.run(['nc', '-w', '2', '-v', current_ip, str(current_port[0])], input='X'.encode('utf-8'), capture_output=True)
+        banner = result.stdout.decode()
+        add_vulnerability("BANNER")
+        match = re.search(r'SSH-(\d+\.\d+)-', banner)
+        if match:
+            version = float(match.group(1))
+            if version < 2.0:
+                print(f"[!] {current_ip}:{current_port[0]} has outdated SSH version: {version}")
+                add_vulnerability("Outdated and Unsupported Software")
+
+        ssh_audit = subprocess.run(['ssh-audit', '-j', current_ip, str(current_port[0])], capture_output=True)
+        ssh_audit_results = json.loads(ssh_audit.stdout.decode())
+        
+        #critical_kex_names = [item["name"] for item in ssh_audit_results["recommendations"]["critical"]["del"]["kex"]]
+
+        for outer in ssh_audit_results:
+            if outer == "recommendations":
+                for recommendation in ssh_audit_results['recommendations']:
+                    if "critical" in recommendation:
+                        for ops in ssh_audit_results['recommendations'][recommendation]:
+                            for keys in ssh_audit_results['recommendations'][recommendation][ops]:
+                                if keys == "kex":
+                                    for keys in ssh_audit_results['recommendations'][recommendation][ops][keys]:
+                                        add_vulnerability("SSH Weak Key Exchange Algorithms Enabled")
+                                        return
+            else:
+                print("No Recommendations Found...")
+
+    except Exception as e:
+        print(f"Error checking SSH: {e}")
+
 #def telnet_routine():
 #    #Check software version via server banner for vulnerabilities/outdated software
 #    #Check for interesting access/functionality
 #    #Check for NTLM information disclosure
 #
 def expected_port_service(nmap_host, ip, port, path):
-    global current_ip, current_port, current_path
+    global current_nmap_host, current_ip, current_port, current_path
+    current_nmap_host = nmap_host
     current_path = path
     current_ip = ip 
     current_port = port
@@ -98,8 +153,10 @@ def expected_port_service(nmap_host, ip, port, path):
         match port[0], port[1]:
             case 21, 'tcp':
                 print_service_details(nmap_host, port)
+                ftp_routine()
             case 22, 'tcp':
                 print_service_details(nmap_host, port)
+                ssh_routine()
             case 23, 'tcp':
                 print_service_details(nmap_host, port)
             case 25, 'tcp':
