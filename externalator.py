@@ -19,8 +19,11 @@ def main():
                     print('')
                     print('-'*50 + f'{host.address} ' + '-' * ( 49 - len(host.address)))
                     for port in host.get_open_ports():
-                       service = host.get_service(port[0], protocol=port[1])
-                       em.expected_port_service(host, host.address, port, working_dir)
+                       if host.hostnames:
+                           for hostname in host.hostnames:
+                               print("URL:" +  hostname)
+                               em.expected_port_service(host, hostname, port, working_dir)
+                    em.expected_port_service(host, host.address, port, working_dir)
         except Exception as e:
             errors.append(f"Invalid XML in {working_dir} : {file} : {e}")
 
@@ -39,16 +42,16 @@ def main():
             grouped_data[vuln_name]["q_a_lines"].add(q_a_line)
 
     for vuln_name, info in grouped_data.items():
+        print()
         print(f"Vulnerability Name: {vuln_name}")
         print("Q&A Lines:")
         print("\n".join(info['q_a_lines']))
-        print()
 
+    print()
     print("IPs: ")
     print("\n".join([ips[0] for ips in em.ip_data.items()]))
     print()
 
-    print()
     if em.missing_headers_table:
         print("Missing Headers!")
         print("| Host | Missing Headers |")

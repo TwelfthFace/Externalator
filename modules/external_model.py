@@ -40,7 +40,7 @@ def print_service_details():
     print(f"Protocol: {print_None_if_empty(service.protocol)}")
     print(f"Tunnel?: {print_None_if_empty(service.tunnel)}")
     print(f"Banner?: {print_None_if_empty(service.banner)}")
-    print(' ')
+    print()
 
 def check_headers(url):
     try:
@@ -49,6 +49,7 @@ def check_headers(url):
         print()
         print("!! Checking Security Headers !!")
         
+        # floor division // 
         if response.status_code // 100 == 2 or response.status_code == 403:
             headers_to_check = ['Strict-Transport-Security', 'Content-Security-Policy', 'X-Content-Type-Options', 'X-Frame-Options']
 
@@ -97,7 +98,6 @@ def ssl_tunnel_routine():
                     if check_entry['severity'] not in ['WARN', 'OK', 'INFO']:
                         print(f"VULNERABLE: {vuln_json.normalise_vuln_to_sp(check_entry['id'])} FINDING: {check_entry['finding']}")
                         add_vulnerability(check_entry['id'], check_entry['finding'])
-                        
         else:
             print("!!!SKIPPED DUE TO ERROR!!!")
             break
