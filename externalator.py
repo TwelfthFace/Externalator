@@ -21,7 +21,7 @@ def main():
                     for port in host.get_open_ports():
                         if host.hostnames:
                             for hostname in host.hostnames:
-                                print("URL:" +  hostname)
+                                print("URL: " +  hostname)
                                 em.expected_port_service(host, hostname, port, working_dir)
                         em.expected_port_service(host, host.address, port, working_dir)
         except Exception as e:
