@@ -61,8 +61,9 @@ def main():
 
     if em.missing_headers_table:
         print("Missing Headers!")
-        print("| Host | Missing Headers |")
-        print("|------|-----------------|")
+        print()
+        print("| Host | Strict-Transport-Security | Content-Security-Policy | X-Content-Type-Options | X-Frame-Options |")
+        print("|------|---------------------------|-------------------------|------------------------|-----------------|")
         for header in em.missing_headers_table:
             print(header)
     print()

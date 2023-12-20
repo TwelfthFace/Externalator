@@ -56,13 +56,17 @@ def check_headers(url):
             if "X-XSS-Protection" in response.headers:
                 add_vulnerability("Deprecated Header In Use: X-XSS Protection")
 
-            missing_headers = []
+            #| Host | Strict-Transport-Security | Content-Security-Policy | X-Content-Type-Options | X-Frame-Options |
+            missing_headers = {"Strict-Transport-Security": "", "Content-Security-Policy": "", "X-Content-Type-Options": "", "X-Frame-Options": ""}
+
             for header in headers_to_check:
                 if header not in response.headers:
-                    missing_headers.append(header)
+                    missing_headers[header] = "[Missing](#high)"
+                else:
+                    missing_headers[header] = "[Present](#info)"
             if missing_headers:
                 add_vulnerability("Missing HTTP Security Headers")
-                missing_headers_table.append(f"| `{url}` | {', '.join(missing_headers)} |")
+                missing_headers_table.append(f"| `{url}` | {'| '.join(missing_headers.values())} |")
             else:
                 print(f"All security headers are present for {url}.")
         else:
