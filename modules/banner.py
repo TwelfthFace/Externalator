@@ -1,4 +1,4 @@
-version = "v1.5"
+version = "v2.0"
 def print_banner():
 
     banner = """
