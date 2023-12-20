@@ -62,7 +62,7 @@ def check_headers(url):
                     missing_headers.append(header)
             if missing_headers:
                 add_vulnerability("Missing HTTP Security Headers")
-                missing_headers_table.append(f"| {url} | {', '.join(missing_headers)} |")
+                missing_headers_table.append(f"| `{url}` | {', '.join(missing_headers)} |")
             else:
                 print(f"All security headers are present for {url}.")
         else:
