@@ -3,6 +3,7 @@ import os
 import json
 import re
 import requests
+from datetime import datetime, timedelta
 from urllib3.exceptions import InsecureRequestWarning
 from ftplib import FTP, FTP_TLS
 from modules import json_parser as vuln_json
@@ -98,10 +99,39 @@ def ssl_tunnel_routine():
         if not check_returncode >= 242:
             with open(check_file, "r") as f:
                 check_json = json.load(f)
+                TLS_start_date = datetime.strptime("2001-01-01", "%Y-%m-%d")
+                TLS_end_date = datetime.strptime("2001-01-01", "%Y-%m-%d")
+                TLS_delta = timedelta()
+                
                 for check_entry in check_json:
+                    if check_entry['id'] == 'cert_notBefore':
+                        TLS_start_date = datetime.strptime(check_entry['finding'].split()[0], "%Y-%m-%d")
+                        # keep the dates the same to prevent false positive delta
+                        TLS_end_date = datetime.strptime(check_entry['finding'].split()[0], "%Y-%m-%d")
+
+                    if check_entry['id'] == 'cert_notAfter':
+                        TLS_end_date = datetime.strptime(check_entry['finding'].split()[0], "%Y-%m-%d")
+                    
+                    if TLS_start_date != TLS_end_date:
+                        TLS_delta = TLS_end_date - TLS_start_date
+
+                    if TLS_delta.days > 825:
+                        print(f"VULNERABLE: {check_entry['id']} FINDING: {check_entry['finding']}")
+                        add_vulnerability("Excessive SSL/TLS Certificate Validity")
+                        #reset dates (DISGUSTING IMPLEMENTATION)
+                        TLS_start_date = datetime.strptime("2001-01-01", "%Y-%m-%d")
+                        TLS_end_date = datetime.strptime("2001-01-01", "%Y-%m-%d")
+                        TLS_delta = timedelta()
+                    
+                    if check_entry['id'] == 'cert_commonName':
+                        # check for wildcard in CN
+                        if '*' in check_entry['finding']:
+                            print(f"VULNERABLE: {check_entry['id']} FINDING: {check_entry['finding']}")
+                            add_vulnerability("Wildcard TLS Certificate in Use")
                     if check_entry['severity'] not in ['WARN', 'OK', 'INFO']:
                         print(f"VULNERABLE: {vuln_json.normalise_vuln_to_sp(check_entry['id'])} FINDING: {check_entry['finding']}")
                         add_vulnerability(check_entry['id'], check_entry['finding'])
+                #print(json.dumps(check_json, indent=4))
         else:
             print("!!!SKIPPED DUE TO ERROR!!!")
             break
