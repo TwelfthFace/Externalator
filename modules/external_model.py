@@ -165,11 +165,11 @@ def ftp_routine():
         print(f'Error checking FTP: {e}')
 
 def ssh_routine():
-#    #check for SSHv1 
-#    #check for outdated SSH version in banner.
-#    #check for publically disclosed vulnerabilities.
-#    #ssh-audit to look for insecure kex algo
-#    #check for password authentication
+    #check for SSHv1 
+    #check for outdated SSH version in banner.
+    #check for publically disclosed vulnerabilities.
+    #ssh-audit to look for insecure kex algo
+    #check for password authentication
     try:
         result = subprocess.run(['nc', '-w', '2', '-v', current_ip, str(current_port[0])], input='X'.encode('utf-8'), capture_output=True)
         banner = result.stdout.decode()
@@ -221,10 +221,19 @@ def ssh_routine():
     except Exception as e:
         print(f"Error checking SSH: {e}")
 
-#def telnet_routine():
-#    #Check software version via server banner for vulnerabilities/outdated software
-#    #Check for interesting access/functionality
-#    #Check for NTLM information disclosure
+def telnet_routine():
+    #Check software version via server banner for vulnerabilities/outdated software
+    #Check for interesting access/functionality
+    #Check for NTLM information disclosure
+    add_vulnerability("Unencrypted Telnet Server")
+
+    service_scripts = service.scripts_results
+
+    for scripts in service_scripts:
+        if scripts['id'] == "telnet-ntlm-info":
+            print(scripts['id'])
+            if scripts['id'] != '':
+                add_vulnerability("Public-Facing NTLM Login")
 
 def expected_port_service(nmap_host, ip, port, path):
     global current_nmap_host, current_ip, current_port, current_path, service
@@ -243,6 +252,7 @@ def expected_port_service(nmap_host, ip, port, path):
                 ssh_routine()
             case 23, 'tcp':
                 print_service_details()
+                telnet_routine()
             #case 25, 'tcp':
             #    print_service_details()
             #case 69, 'udp':
