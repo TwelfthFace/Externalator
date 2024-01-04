@@ -3,6 +3,7 @@ import os
 import json
 import re
 import requests
+import pexpect
 from datetime import datetime, timedelta
 from urllib3.exceptions import InsecureRequestWarning
 from ftplib import FTP, FTP_TLS
@@ -172,13 +173,33 @@ def ssh_routine():
     try:
         result = subprocess.run(['nc', '-w', '2', '-v', current_ip, str(current_port[0])], input='X'.encode('utf-8'), capture_output=True)
         banner = result.stdout.decode()
-        add_vulnerability("BANNER")
+        add_vulnerability("BANNER: " + banner.strip())
+
         match = re.search(r'SSH-(\d+\.\d+)-', banner)
         if match:
             version = float(match.group(1))
             if version < 2.0:
                 print(f"[!] {current_ip}:{current_port[0]} has outdated SSH version: {version}")
                 add_vulnerability("Outdated and Unsupported Software")
+
+        child = pexpect.spawn(f'ssh root@{current_ip}')
+        try:
+            index = child.expect(['password:', 'continue connecting (yes/no)?'], timeout=10)
+            if index == 0:
+                print("Password prompt found. Password authentication is supported.")
+                add_vulnerability("Public-Facing SSH Service with Password Protection")
+            elif index == 1:
+                child.sendline('yes')
+                index = child.expect(['password:', pexpect.EOF], timeout=10)
+                if index == 0:
+                    print("Password prompt found after accepting key. Password authentication is supported.")
+                    add_vulnerability("Public-Facing SSH Service with Password Protection")
+        except pexpect.exceptions.TIMEOUT:
+            print("Connection attempt timed out.")
+        except pexpect.exceptions.EOF:
+            print("Connection closed unexpectedly.")
+        finally:
+            child.close()
 
         ssh_audit = subprocess.run(['ssh-audit', '-j', current_ip, str(current_port[0])], capture_output=True)
         ssh_audit_results = json.loads(ssh_audit.stdout.decode())
@@ -193,10 +214,9 @@ def ssh_routine():
                             for keys in ssh_audit_results['recommendations'][recommendation][ops]:
                                 if keys == "kex":
                                     for keys in ssh_audit_results['recommendations'][recommendation][ops][keys]:
+                                        print(f"VULNERABLE: Weak KEX Algorithm Support")
                                         add_vulnerability("SSH Weak Key Exchange Algorithms Enabled")
                                         return
-            else:
-                print("No Recommendations Found...")
 
     except Exception as e:
         print(f"Error checking SSH: {e}")
@@ -205,7 +225,7 @@ def ssh_routine():
 #    #Check software version via server banner for vulnerabilities/outdated software
 #    #Check for interesting access/functionality
 #    #Check for NTLM information disclosure
-#
+
 def expected_port_service(nmap_host, ip, port, path):
     global current_nmap_host, current_ip, current_port, current_path, service
     current_nmap_host = nmap_host
@@ -223,18 +243,18 @@ def expected_port_service(nmap_host, ip, port, path):
                 ssh_routine()
             case 23, 'tcp':
                 print_service_details()
-            case 25, 'tcp':
-                print_service_details()
-            case 69, 'udp':
-                print_service_details()
-            case 110, 'tcp':
-                print_service_details()
-            case 143, 'tcp':
-                print_service_details()
-            case 161, 'udp':
-                print_service_details()
-            case 162, 'udp':
-                print_service_details()
+            #case 25, 'tcp':
+            #    print_service_details()
+            #case 69, 'udp':
+            #    print_service_details()
+            #case 110, 'tcp':
+            #    print_service_details()
+            #case 143, 'tcp':
+            #    print_service_details()
+            #case 161, 'udp':
+            #    print_service_details()
+            #case 162, 'udp':
+            #    print_service_details()
             case 80, 'tcp':
                 print_service_details()
                 check_headers("http://" + current_ip + ':' + str(current_port[0]))
@@ -243,31 +263,31 @@ def expected_port_service(nmap_host, ip, port, path):
                 ssl_tunnel_routine()
                 if "http" in service.service:
                     check_headers("https://" + current_ip + ':' + str(current_port[0]))
-            case 53, 'udp':
-                print_service_details()
-            case 445, 'tcp':
-                print_service_details()
-            case 388, 'tcp':
-                print_service_details()
+            #case 53, 'udp':
+            #    print_service_details()
+            #case 445, 'tcp':
+            #    print_service_details()
+            #case 388, 'tcp':
+            #    print_service_details()
             case 993, 'tcp':
                 print_service_details()
                 ssl_tunnel_routine()
-            case 636, 'tcp':
-                print_service_details()
-            case 135, 'tcp':
-                print_service_details()
-            case 3389, 'tcp':
-                print_service_details()
-            case 1433, 'tcp':
-                print_service_details()
-            case 4022, 'tcp':
-                print_service_details()
-            case 135, 'tcp':
-                print_service_details()
-            case 1434, 'tcp':
-                print_service_details()
-            case 1434, 'udp':
-                print_service_details()
+            #case 636, 'tcp':
+            #    print_service_details()
+            #case 135, 'tcp':
+            #    print_service_details()
+            #case 3389, 'tcp':
+            #    print_service_details()
+            #case 1433, 'tcp':
+            #    print_service_details()
+            #case 4022, 'tcp':
+            #    print_service_details()
+            #case 135, 'tcp':
+            #    print_service_details()
+            #case 1434, 'tcp':
+            #    print_service_details()
+            #case 1434, 'udp':
+            #    print_service_details()
             case 123, 'udp':
                 print_service_details()
                 add_vulnerability("Network Time Protocol (NTP) Mode 6 Scanner")

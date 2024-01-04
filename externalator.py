@@ -23,7 +23,8 @@ def main():
                             for hostname in host.hostnames:
                                 print("URL: " +  hostname)
                                 em.expected_port_service(host, hostname, port, working_dir)
-                        em.expected_port_service(host, host.address, port, working_dir)
+                        else:
+                            em.expected_port_service(host, host.address, port, working_dir)
         except Exception as e:
             errors.append(f"Invalid XML in {working_dir} : {file} : {e}")
 
