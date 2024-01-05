@@ -144,7 +144,7 @@ def ftp_routine():
     #tools like nMap scripts / scrape output
     try:
         with FTP(current_ip, timeout=5) as ftp:
-            add_vulnerability("BANNER", ftp.getwelcome())
+            add_vulnerability("BANNER " + ftp.getwelcome())
             login_resp = ftp.login()
             if "230" in login_resp:
                 print('#'*50 + ' ERRORS' + ('#' * (50 - len('ERRORS'))))
@@ -176,13 +176,16 @@ def ssh_routine():
         add_vulnerability("BANNER: " + banner.strip())
 
         match = re.search(r'SSH-(\d+\.\d+)-', banner)
-        if match:
-            version = float(match.group(1))
-            if version < 2.0:
-                print(f"[!] {current_ip}:{current_port[0]} has outdated SSH version: {version}")
-                add_vulnerability("Outdated and Unsupported Software")
+        if banner != '':
+            if match:
+                version = float(match.group(1))
+                if version < 2.0:
+                    print(f"[!] {current_ip}:{current_port[0]} has outdated SSH version: {version}")
+                    add_vulnerability("Outdated and Unsupported Software")
+            else:
+                print("Unable to determine SSH version.")
 
-        child = pexpect.spawn(f'ssh root@{current_ip}')
+        child = pexpect.spawn(f'ssh root@{current_ip} -p{str(current_port[0])}')
         try:
             index = child.expect(['password:', 'continue connecting (yes/no)?'], timeout=10)
             if index == 0:
@@ -199,9 +202,9 @@ def ssh_routine():
         except pexpect.exceptions.EOF:
             print("Connection closed unexpectedly.")
         finally:
-            child.close()
+                child.close()
 
-        ssh_audit = subprocess.run(['ssh-audit', '-j', current_ip, str(current_port[0])], capture_output=True)
+        ssh_audit = subprocess.run(['ssh-audit', '-j', current_ip, '-p', str(current_port[0])], capture_output=True)
         ssh_audit_results = json.loads(ssh_audit.stdout.decode())
         
         #critical_kex_names = [item["name"] for item in ssh_audit_results["recommendations"]["critical"]["del"]["kex"]]
@@ -279,9 +282,9 @@ def expected_port_service(nmap_host, ip, port, path):
             #    print_service_details()
             #case 388, 'tcp':
             #    print_service_details()
-            case 993, 'tcp':
-                print_service_details()
-                ssl_tunnel_routine()
+            #case 993, 'tcp':
+            #    print_service_details()
+            #    ssl_tunnel_routine()
             #case 636, 'tcp':
             #    print_service_details()
             #case 135, 'tcp':
@@ -310,6 +313,9 @@ def expected_port_service(nmap_host, ip, port, path):
                 else:
                     if "http" in service.service:
                         check_headers("http://" + current_ip + ':' + str(current_port[0]))
+
+                if "ssh" in service.service:
+                    ssh_routine()
 
     except Exception as e:
         print(repr(e))
