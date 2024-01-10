@@ -13,4 +13,4 @@ Then run,
 python3 externalator.py <companyname>`
 
 ## For The Future
-I plan to expand the scripts capabilties to cover a wider range of services.
+I plan to expand the script's capabilities to cover a wider range of services.
