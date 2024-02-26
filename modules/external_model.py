@@ -13,10 +13,10 @@ ip_data = {}
 missing_headers_table = []
 
 def add_vulnerability(vuln_name, vuln_def_desc="NULL"):
-    sp_desc = vuln_json.load_vuln_desc_from_sp(vuln_name) 
+    #sp_desc = vuln_json.load_vuln_desc_from_sp(vuln_name) 
 
-    if sp_desc == "NULL":
-        sp_desc = vuln_def_desc
+    #if sp_desc == "NULL":
+    sp_desc = vuln_def_desc
 
     if current_ip not in ip_data:
         ip_data[current_ip] = []
@@ -66,7 +66,8 @@ def check_headers(url):
                     missing_headers[header] = "[Missing](#high)"
                 else:
                     missing_headers[header] = "[Present](#info)"
-            if missing_headers:
+
+            if any(value == "[Missing](#high)" for value in missing_headers.values()):
                 add_vulnerability("Missing HTTP Security Headers")
                 missing_headers_table.append(f"| `{url}` | {'| '.join(missing_headers.values())} |")
             else:
@@ -100,30 +101,18 @@ def ssl_tunnel_routine():
         if not check_returncode >= 242:
             with open(check_file, "r") as f:
                 check_json = json.load(f)
-                TLS_start_date = datetime.strptime("2001-01-01", "%Y-%m-%d")
-                TLS_end_date = datetime.strptime("2001-01-01", "%Y-%m-%d")
-                TLS_delta = timedelta()
                 
                 for check_entry in check_json:
-                    if check_entry['id'] == 'cert_notBefore':
-                        TLS_start_date = datetime.strptime(check_entry['finding'].split()[0], "%Y-%m-%d")
-                        # keep the dates the same to prevent false positive delta
-                        TLS_end_date = datetime.strptime(check_entry['finding'].split()[0], "%Y-%m-%d")
+                    if check_entry['id'] == 'cert_extlifeSpan':
+                        if check_entry['severity'] != 'OK':
+                            cert_lifespan = check_entry['finding'].split()[0].strip()
 
-                    if check_entry['id'] == 'cert_notAfter':
-                        TLS_end_date = datetime.strptime(check_entry['finding'].split()[0], "%Y-%m-%d")
-                    
-                    if TLS_start_date != TLS_end_date:
-                        TLS_delta = TLS_end_date - TLS_start_date
+                            if int(cert_lifespan) > 825:
+                                print(f"VULNERABLE: {check_entry['id']} FINDING: {check_entry['finding']}")
+                                add_vulnerability("Excessive SSL/TLS Certificate Validity")
+                        else:
+                            print("Certificate doesn't have excessive validity")
 
-                    if TLS_delta.days > 825:
-                        print(f"VULNERABLE: {check_entry['id']} FINDING: {check_entry['finding']}")
-                        add_vulnerability("Excessive SSL/TLS Certificate Validity")
-                        #reset dates (DISGUSTING IMPLEMENTATION)
-                        TLS_start_date = datetime.strptime("2001-01-01", "%Y-%m-%d")
-                        TLS_end_date = datetime.strptime("2001-01-01", "%Y-%m-%d")
-                        TLS_delta = timedelta()
-                    
                     if check_entry['id'] == 'cert_commonName':
                         # check for wildcard in CN
                         if '*' in check_entry['finding']:
@@ -184,6 +173,8 @@ def ssh_routine():
                     add_vulnerability("Outdated and Unsupported Software")
             else:
                 print("Unable to determine SSH version.")
+        else:
+            print("Empty banner!")
 
         child = pexpect.spawn(f'ssh root@{current_ip} -p{str(current_port[0])}')
         try:
