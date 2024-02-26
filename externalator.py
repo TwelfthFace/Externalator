@@ -18,10 +18,10 @@ def main():
                 if host.get_open_ports():
                     print('')
                     for port in host.get_open_ports():
-                        if host.hostnames:
-                            for hostname in host.hostnames:
-                                print('-'*50 + f' {hostname} ' + '-' * ( 48 - len(hostname)))
-                                em.expected_port_service(host, hostname, port, working_dir)
+                        #if host.hostnames:
+                        #    for hostname in host.hostnames:
+                        #        print('-'*50 + f' {hostname} ' + '-' * ( 48 - len(hostname)))
+                        #        em.expected_port_service(host, hostname, port, working_dir)
                         print('-'*50 + f' {host.address} ' + '-' * ( 48 - len(host.address)))
                         em.expected_port_service(host, host.address, port, working_dir)
         except Exception as e:
