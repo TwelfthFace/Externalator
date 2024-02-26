@@ -2,7 +2,6 @@
 */
 modules/*/
 !modules/
-!vulns/placehold.json
 *.txt
 *swp
 .pk
