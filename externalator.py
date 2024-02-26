@@ -72,7 +72,7 @@ def main():
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='External Infrastructure automator for usage inside PentestPeople.')
+    parser = argparse.ArgumentParser(description='External Infrastructure automator for usage on networks with explicit permission from owners.')
     parser.add_argument('work_dir', action='store', metavar='work_dir', help='Working Directory, should pertain to a single clients Nmap files.')
 
     args = parser.parse_args()
