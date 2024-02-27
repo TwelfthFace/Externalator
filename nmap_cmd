@@ -1,0 +1,1 @@
+nmap -sS -p- -sC -sV -pN -iL <work_dir>/host_list -oX <work_dir>/xml/scan01_TCP.xml
