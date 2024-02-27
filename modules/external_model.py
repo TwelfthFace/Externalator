@@ -68,7 +68,9 @@ def check_headers(url):
                  "X-Powered-CMS",
                  "X-Wix-Renderer-Server",
                  "X-Wix-Server-Architecture",
-                 "X-Wix-Application-Instance-Id"
+                 "X-Wix-Application-Instance-Id",
+                 "X-Owa-Version",
+                 "X-Aspnetmvc-Version"
             ]
 
             if "X-XSS-Protection" in response.headers:
