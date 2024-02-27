@@ -54,6 +54,21 @@ def check_headers(url):
         # floor division // 
         if response.status_code // 100 == 2 or response.status_code == 403:
             headers_to_check = ['Strict-Transport-Security', 'Content-Security-Policy', 'X-Content-Type-Options', 'X-Frame-Options']
+            common_version_headers = [
+                 "Server",
+                 "X-Powered-By",
+                 "X-AspNet-Version",
+                 "X-Runtime",
+                 "X-Drupal-Cache",
+                 "X-Joomla-Cache",
+                 "X-Pingback",
+                 "X-Version",
+                 "X-Generator",
+                 "X-Powered-CMS",
+                 "X-Wix-Renderer-Server",
+                 "X-Wix-Server-Architecture",
+                 "X-Wix-Application-Instance-Id"
+            ]
 
             if "X-XSS-Protection" in response.headers:
                 add_vulnerability("Deprecated Header In Use: X-XSS Protection")
@@ -62,7 +77,7 @@ def check_headers(url):
             missing_headers = {"Strict-Transport-Security": "", "Content-Security-Policy": "", "X-Content-Type-Options": "", "X-Frame-Options": ""}
 
             for header in headers_to_check:
-                if header not in response.headers:
+                if header.lower() not in (h.lower() for h in response.headers.keys()):
                     missing_headers[header] = "[Missing](#high)"
                 else:
                     missing_headers[header] = "[Present](#info)"
@@ -72,6 +87,10 @@ def check_headers(url):
                 missing_headers_table.append(f"| `{url}` | {'| '.join(missing_headers.values())} |")
             else:
                 print(f"All security headers are present for {url}.")
+
+            for version_header in common_version_headers:
+                if version_header.lower() in (h.lower() for h in response.headers.keys()):
+                    add_vulnerability(f"Software Version Exposed: {version_header=} {response.headers[version_header]}")
         else:
             print(f"Error: {response.status_code} - Unable to fetch the URL {url}.")
     except requests.RequestException as e:
