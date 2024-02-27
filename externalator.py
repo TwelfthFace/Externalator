@@ -67,6 +67,14 @@ def main():
         for header in em.missing_headers_table:
             print(header)
     print()
+    if em.version_headers_table:
+        print("Missing Headers!")
+        print()
+        print("| URL  |                 Header                   |                       Value                         |")
+        print("|------|------------------------------------------|-----------------------------------------------------|")
+        for header in em.version_headers_table:
+            print(header)
+    print()
         
     [print(error) for error in errors]
 

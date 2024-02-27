@@ -11,6 +11,7 @@ from modules import json_parser as vuln_json
 
 ip_data = {}
 missing_headers_table = []
+version_headers_table = []
 
 def add_vulnerability(vuln_name, vuln_def_desc="NULL"):
     #sp_desc = vuln_json.load_vuln_desc_from_sp(vuln_name) 
@@ -90,7 +91,8 @@ def check_headers(url):
 
             for version_header in common_version_headers:
                 if version_header.lower() in (h.lower() for h in response.headers.keys()):
-                    add_vulnerability(f"Software Version Exposed: {version_header=} {response.headers[version_header]}")
+                    version_headers_table.append(f"| {url} | {version_header} | {response.headers[version_header]} |")
+                    add_vulnerability("Software Version Disclosure")
         else:
             print(f"Error: {response.status_code} - Unable to fetch the URL {url}.")
     except requests.RequestException as e:
