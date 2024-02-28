@@ -12,6 +12,7 @@ from modules import json_parser as vuln_json
 ip_data = {}
 missing_headers_table = []
 version_headers_table = []
+ssh_failed_kex_table = []
 
 def add_vulnerability(vuln_name, vuln_def_desc="NULL"):
     #sp_desc = vuln_json.load_vuln_desc_from_sp(vuln_name) 
@@ -216,24 +217,22 @@ def ssh_routine():
         except pexpect.exceptions.EOF:
             print("Connection closed unexpectedly.")
         finally:
-                child.close()
+            child.close()
 
         ssh_audit = subprocess.run(['ssh-audit', '-j', current_ip, '-p', str(current_port[0])], capture_output=True)
         ssh_audit_results = json.loads(ssh_audit.stdout.decode())
         
-        #critical_kex_names = [item["name"] for item in ssh_audit_results["recommendations"]["critical"]["del"]["kex"]]
+        failed_kex_algos = []
 
-        for outer in ssh_audit_results:
-            if outer == "recommendations":
-                for recommendation in ssh_audit_results['recommendations']:
-                    if "critical" in recommendation:
-                        for ops in ssh_audit_results['recommendations'][recommendation]:
-                            for keys in ssh_audit_results['recommendations'][recommendation][ops]:
-                                if keys == "kex":
-                                    for keys in ssh_audit_results['recommendations'][recommendation][ops][keys]:
-                                        print(f"VULNERABLE: Weak KEX Algorithm Support")
-                                        add_vulnerability("SSH Weak Key Exchange Algorithms Enabled")
-                                        return
+        for kex in ssh_audit_results.get("kex", []):
+            if "fail" in kex.get("notes", []):
+                failed_kex_algos.append(kex['algorithm'])
+        
+        for algo in failed_kex_algos:
+            ssh_failed_kex_table.append(f"| {current_ip}:{current_port[0]} | {algo} |")
+
+        if failed_kex_algos:
+            add_vulnerability("Insecure KEX Algoritm Supported")
 
     except Exception as e:
         print(f"Error checking SSH: {e}")

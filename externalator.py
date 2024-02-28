@@ -75,6 +75,14 @@ def main():
         for header in em.version_headers_table:
             print(header)
     print()
+    if em.ssh_failed_kex_table:
+        print("Insecure KEX Algorithms!")
+        print()
+        print("| IP : PORT  |                                           Algo                                             |")
+        print("|------------|--------------------------------------------------------------------------------------------|")
+        for header in em.ssh_failed_kex_table:
+            print(header)
+    print()
         
     [print(error) for error in errors]
 
