@@ -68,7 +68,7 @@ def main():
             print(header)
     print()
     if em.version_headers_table:
-        print("Missing Headers!")
+        print("Version Disclosure Headers!")
         print()
         print("| URL  |                 Header                   |                       Value                         |")
         print("|------|------------------------------------------|-----------------------------------------------------|")
