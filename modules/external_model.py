@@ -49,12 +49,12 @@ def print_service_details():
 def check_headers(url):
     try:
         requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
-        response = requests.get(url, timeout=15, verify=False)
+        response = requests.get(url, timeout=8, verify=False, allow_redirects=False)
         print()
         print("!! Checking Security Headers !!")
         
         # floor division // 
-        if response.status_code // 100 == 2 or response.status_code == 403:
+        if response.status_code // 100 == 2 or response.status_code == 403 or response.status_code == 302:
             headers_to_check = ['Strict-Transport-Security', 'Content-Security-Policy', 'X-Content-Type-Options', 'X-Frame-Options']
             common_version_headers = [
                  "Server",
@@ -88,7 +88,7 @@ def check_headers(url):
 
             if any(value == "[Missing](#high)" for value in missing_headers.values()):
                 add_vulnerability("Missing HTTP Security Headers")
-                missing_headers_table.append(f"| `{url}` | {'| '.join(missing_headers.values())} |")
+                missing_headers_table.append(f"| {url} | {'| '.join(missing_headers.values())} |")
             else:
                 print(f"All security headers are present for {url}.")
 
@@ -107,9 +107,9 @@ def ssl_tunnel_routine():
     ssl_checks_to_do = ['PROTOCOL', 'CERTIFICATE','VULNERABILITY']
     for check in ssl_checks_to_do:
         check_file = current_path + '/' + check.lower() + '_test_' + current_ip + '_' + str(current_port[0])
-        check_proc_params = [["testssl", "-p", "-oj", check_file, '-q', current_ip + ':' + str(current_port[0])],
-                             ["testssl", "-S", "-oj", check_file, '-q', current_ip + ':' + str(current_port[0])],
-                             ["testssl", "-U", "-oj", check_file, '-q', current_ip + ':' + str(current_port[0])]]
+        check_proc_params = [["testssl", "--nodns", "min", "-p", "-oj", check_file, '-q', current_ip + ':' + str(current_port[0])],
+                             ["testssl", "--nodns", "min", "-S", "-oj", check_file, '-q', current_ip + ':' + str(current_port[0])],
+                             ["testssl", "--nodns", "min", "-U", "-oj", check_file, '-q', current_ip + ':' + str(current_port[0])]]
         check_returncode = 0
         if not os.path.isfile(check_file):
             if check is ssl_checks_to_do[0]:
@@ -137,12 +137,21 @@ def ssl_tunnel_routine():
                         else:
                             print("Certificate doesn't have excessive validity")
 
+                    
                     if check_entry['id'] == 'cert_commonName':
                         # check for wildcard in CN
                         if '*' in check_entry['finding']:
                             print(f"VULNERABLE: {check_entry['id']} FINDING: {check_entry['finding']}")
                             add_vulnerability("Wildcard TLS Certificate in Use")
                     if check_entry['severity'] not in ['WARN', 'OK', 'INFO']:
+                        if check_entry['id'] == 'cert_expirationStatus':
+                            if 'expired' in check_entry['finding']:
+                                print("VULNERABLE: Certificate has expired!")
+                                add_vulnerability("TLS Certificate has expired!")
+                                continue
+                        if check_entry['id'] == 'cert_chain_of_trust':
+                            if 'expired' in check_entry['finding']:
+                                continue
                         print(f"VULNERABLE: {vuln_json.normalise_vuln_to_sp(check_entry['id'])} FINDING: {check_entry['finding']}")
                         add_vulnerability(check_entry['id'], check_entry['finding'])
                 #print(json.dumps(check_json, indent=4))
