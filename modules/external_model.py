@@ -104,23 +104,27 @@ def check_headers(url):
 def ssl_tunnel_routine():
 #    #enum ciphers: check for CBC ciphers (Lucky13) - BEAST CONDITIONS - SWEET32 - testssl OR sslscan OR nMap
 #    #check for other vulns (Heartbleed, CCS,Ticketbleed, ROBOT, Secure_Renegotiation, Secure_Client-Initiated_Renegotiation, CRIME, BREACH POODLE, TLS_FALLBACK_SCSV, SWEET32, FREAK, DROWN, LOGJAM, BEAST, LUCKY13, Winshock, RC4)
-    ssl_checks_to_do = ['PROTOCOL', 'CERTIFICATE','VULNERABILITY']
+    ssl_checks_to_do = ['PROTOCOL', 'CERTIFICATE', 'VULNERABILITY']
     for check in ssl_checks_to_do:
         check_file = current_path + '/' + check.lower() + '_test_' + current_ip + '_' + str(current_port[0])
-        check_proc_params = [["testssl", "--nodns", "min", "-p", "-oj", check_file, '-q', current_ip + ':' + str(current_port[0])],
-                             ["testssl", "--nodns", "min", "-S", "-oj", check_file, '-q', current_ip + ':' + str(current_port[0])],
-                             ["testssl", "--nodns", "min", "-U", "-oj", check_file, '-q', current_ip + ':' + str(current_port[0])]]
+        # Modify check_proc_params to construct a command string that includes the tee command.
+        check_proc_params = [
+            f"testssl --nodns min -p -q  -oj {check_file} {current_ip}:{current_port[0]} | tee {check_file + '_colour_out'}",
+            f"testssl --nodns min -S -q  -oj {check_file} {current_ip}:{current_port[0]} | tee {check_file + '_colour_out'}",
+            f"testssl --nodns min -U -q  -oj {check_file} {current_ip}:{current_port[0]} | tee {check_file + '_colour_out'}"
+        ]
         check_returncode = 0
         if not os.path.isfile(check_file):
-            if check is ssl_checks_to_do[0]:
-                check_proc = subprocess.run(check_proc_params[0], input='no'.encode('utf-8'))
-            if check is ssl_checks_to_do[1]:
-                check_proc = subprocess.run(check_proc_params[1], input='no'.encode('utf-8'))
-            if check is ssl_checks_to_do[2]:
-                check_proc = subprocess.run(check_proc_params[2], input='no'.encode('utf-8'))
+            if check == ssl_checks_to_do[0]:  # Use == for string comparison
+                check_proc = subprocess.run(check_proc_params[0], shell=True, input='no'.encode('utf-8'))
+            elif check == ssl_checks_to_do[1]:
+                check_proc = subprocess.run(check_proc_params[1], shell=True, input='no'.encode('utf-8'))
+            elif check == ssl_checks_to_do[2]:
+                check_proc = subprocess.run(check_proc_params[2], shell=True, input='no'.encode('utf-8'))
+            # Check the return code directly from the subprocess call
+            check_returncode = check_proc.returncode
         else:
-            check_returncode = 0
-    
+            print(f"{check} check already performed. File exists: {check_file}") 
         print('#'*50 + check + ' ERRORS' + ('#' * (50 - len(check))))
         if not check_returncode >= 242:
             with open(check_file, "r") as f:
